@@ -1,13 +1,14 @@
 import modules.scripts as scripts
 import gradio as gr
 import os
+from typing import List, Tuple, Union
 
 from modules import script_callbacks
 
 
-def div_latent_couple(dropdown_row, div_ratio, back_ratio, chkbox_back):
+def div_latent_couple(dropdown_row: List[str], div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
     # ドロップダウンリストの中で0以外の値を抽出する
-    row_column = []
+    row_column: List[str] = []
     for column in dropdown_row:
         if column != "0":
             row_column.append(column)
@@ -15,22 +16,22 @@ def div_latent_couple(dropdown_row, div_ratio, back_ratio, chkbox_back):
     # 入力された値の数に応じて分岐する
     if len(row_column) == 0:
         # 入力がない場合
-        division = "none" 
-        position = "none"
-        weight = "none"
+        division: str = "none" 
+        position: str = "none"
+        weight: str = "none"
     else:
         # 1つ以上入力がある場合
-        division = ""
-        position = ""
-        weight = ""
+        division: str = ""
+        position: str = ""
+        weight: str = ""
         # 背景の設定がありの場合
         if chkbox_back is True:
             division += "1:1,"
             position += "0:0,"
             weight += str(clamp_ratio(back_ratio)) + ","
         # 分割領域の設定
-        pos_row = 0
-        pos_col = 0
+        pos_row: int = 0
+        pos_col: int = 0
         for col_num in row_column:
             for i in range(int(col_num)):
                 division += str(len(row_column)) + ":" + str(col_num) + ","
@@ -46,12 +47,12 @@ def div_latent_couple(dropdown_row, div_ratio, back_ratio, chkbox_back):
 
     return division, position, weight
 
-def clamp_ratio(ratio):
+def clamp_ratio(ratio: float) -> float:
     return max(0.0, min(1.0, float(ratio)))
 
-def div_regional_prompter(dropdown_row):
+def div_regional_prompter(dropdown_row: List[str]) -> Tuple[str, str, str]:
     # ドロップダウンリストの中で0以外の値を抽出する
-    row_column = []
+    row_column: List[str] = []
     for column in dropdown_row:
         if column != "0":
             row_column.append(column)
@@ -59,27 +60,27 @@ def div_regional_prompter(dropdown_row):
     # 入力された値の数に応じて分岐する
     if len(row_column) == 0:
         # 入力がない場合
-        division = "none" 
+        division: str = "none" 
     elif len(row_column) == 1:
         # 1つの値が入力されている場合
         division = "1," * int(row_column[0])
         division = division.rstrip(",")  # 末尾のカンマを削除する
     else:
         # 2つ以上の値が入力されている場合
-        division = ""
+        division: str = ""
         for col_num in row_column:
             col_str = "1" + (",1" * int(col_num))
             division += col_str + ";"
         division = division.rstrip(";")  # 末尾のセミコロンを削除する
 
-    position = "none"
-    weight = "none"
+    position: str = "none"
+    weight: str = "none"
 
     return division, position, weight
 
-def division_output(radio_sel, dd_row_1, dd_row_2, dd_row_3, dd_row_4, dd_row_5, div_ratio, back_ratio, chkbox_back):
+def division_output(radio_sel: str, dd_row_1: str, dd_row_2: str, dd_row_3: str, dd_row_4: str, dd_row_5: str, div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
     # ドロップダウンリストをリストにまとめる
-    dropdown_row = [dd_row_1, dd_row_2, dd_row_3, dd_row_4, dd_row_5]
+    dropdown_row: List[str] = [dd_row_1, dd_row_2, dd_row_3, dd_row_4, dd_row_5]
 
     if radio_sel == "latent_couple":
         # latent_coupleの処理
@@ -93,7 +94,7 @@ def division_output(radio_sel, dd_row_1, dd_row_2, dd_row_3, dd_row_4, dd_row_5,
     return division, position, weight
 
 
-def on_ui_tabs():
+def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
     with gr.Blocks(analytics_enabled=False) as ui_component:
         gr.HTML(value='Latent Reagional Helper')
         with gr.Row():
@@ -101,7 +102,7 @@ def on_ui_tabs():
                 # UI画面の作成
                 # 入力
                 # 拡張機能洗濯用のラジオボタン
-                radio_sel = gr.Radio(
+                radio_sel: gr.Radio = gr.Radio(
                     ["latent_couple", "regional_prompter"],
                     label="Select latent_couple or regional_prompter",
                     value="latent_couple"  # デフォルト値を指定する
@@ -110,7 +111,7 @@ def on_ui_tabs():
                 # テキストを表示
                 gr.HTML(value='Divisions Settings')
                 # Divisions Settingのドロップダウンリスト
-                dropdown_row = []
+                dropdown_row: List[gr.Dropdown] = []
                 for i in range(5):
                     dropdown_row.append(gr.Dropdown(
                         ["0", "1", "2", "3", "4", "5"],
@@ -119,38 +120,38 @@ def on_ui_tabs():
                     ))
                 
                 with gr.Row():
-                    textbox_div_ratio = gr.Textbox(
+                    textbox_div_ratio: gr.Textbox = gr.Textbox(
                         label='Divisions Ratio (Latent Only)',
                         interactive=True,
                         value = 0.8
                     )
     
-                    textbox_back_ratio = gr.Textbox(
+                    textbox_back_ratio: gr.Textbox = gr.Textbox(
                         label='Background Ratio (Latent Only)',
                         interactive=True,
                         value = 0.2
                     )
 
-                    chkbox_back = gr.Checkbox(
+                    chkbox_back: gr.Checkbox = gr.Checkbox(
                         label="Background Enable (Latent Only)",
                         value=False
                     )
 
                 # 実行ボタン
-                button_run = gr.Button(value='run', variant='primary')
+                button_run: gr.Button = gr.Button(value='run', variant='primary')
 
                 # 出力
                 # テキストボックス
-                textbox_division = gr.Textbox(
+                textbox_division: gr.Textbox = gr.Textbox(
                     label='Divisions Ratio',
                     interactive=True
                 )
                 with gr.Row():
-                    textbox_position = gr.Textbox(
+                    textbox_position: gr.Textbox = gr.Textbox(
                         label='Position (Latent Only)',
                         interactive=True
                     )
-                    textbox_weight = gr.Textbox(
+                    textbox_weight: gr.Textbox = gr.Textbox(
                         label='Weight (Latent Only)',
                         interactive=True
                     )
