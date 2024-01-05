@@ -6,15 +6,10 @@ from typing import List, Tuple, Union
 from modules import script_callbacks
 
 
-def div_latent_couple(dropdown_row: List[str], div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
-    # ドロップダウンリストの中で0以外の値を抽出する
-    row_column: List[str] = []
-    for column in dropdown_row:
-        if column != "0":
-            row_column.append(column)
+def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
     
     # 入力された値の数に応じて分岐する
-    if len(row_column) == 0:
+    if len(exist_col_num_list) == 0:
         # 入力がない場合
         division: str = "none" 
         position: str = "none"
@@ -32,9 +27,9 @@ def div_latent_couple(dropdown_row: List[str], div_ratio: float, back_ratio: flo
         # 分割領域の設定
         pos_row: int = 0
         pos_col: int = 0
-        for col_num in row_column:
+        for col_num in exist_col_num_list:
             for i in range(int(col_num)):
-                division += str(len(row_column)) + ":" + str(col_num) + ","
+                division += str(len(exist_col_num_list)) + ":" + str(col_num) + ","
                 position += str(pos_row) + ":" + str(pos_col) + ","
                 weight += str(clamp_ratio(div_ratio)) + ","
                 pos_col += 1
@@ -50,27 +45,22 @@ def div_latent_couple(dropdown_row: List[str], div_ratio: float, back_ratio: flo
 def clamp_ratio(ratio: float) -> float:
     return max(0.0, min(1.0, float(ratio)))
 
-def div_regional_prompter(dropdown_row: List[str]) -> Tuple[str, str, str]:
-    # ドロップダウンリストの中で0以外の値を抽出する
-    row_column: List[str] = []
-    for column in dropdown_row:
-        if column != "0":
-            row_column.append(column)
-    
+def div_regional_prompter(exist_col_num_list: List[str]) -> Tuple[str, str, str]:
+
     # 入力された値の数に応じて分岐する
-    if len(row_column) == 0:
+    if len(exist_col_num_list) == 0:
         # 入力がない場合
         division: str = "none" 
-    elif len(row_column) == 1:
+    elif len(exist_col_num_list) == 1:
         # 1つの値が入力されている場合
-        division = "1," * int(row_column[0])
+        division = "1," * int(exist_col_num_list[0])
         division = division.rstrip(",")  # 末尾のカンマを削除する
     else:
         # 2つ以上の値が入力されている場合
         division: str = ""
-        for col_num in row_column:
-            col_str = "1" + (",1" * int(col_num))
-            division += col_str + ";"
+        for col_num in exist_col_num_list:
+            col_num_str = "1" + (",1" * int(col_num))
+            division += col_num_str + ";"
         division = division.rstrip(";")  # 末尾のセミコロンを削除する
 
     position: str = "none"
@@ -78,16 +68,22 @@ def div_regional_prompter(dropdown_row: List[str]) -> Tuple[str, str, str]:
 
     return division, position, weight
 
-def division_output(radio_sel: str, dd_row_1: str, dd_row_2: str, dd_row_3: str, dd_row_4: str, dd_row_5: str, div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
+def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: str, col_num_4: str, col_num_5: str, div_ratio: float, back_ratio: float, chkbox_back: bool) -> Tuple[str, str, str]:
     # ドロップダウンリストをリストにまとめる
-    dropdown_row: List[str] = [dd_row_1, dd_row_2, dd_row_3, dd_row_4, dd_row_5]
+    col_num_list: List[str] = [col_num_1, col_num_2, col_num_3, col_num_4, col_num_5]
 
-    if radio_sel == "latent_couple":
-        # latent_coupleの処理
-        division, position, weight = div_latent_couple(dropdown_row, div_ratio, back_ratio, chkbox_back)
-    elif radio_sel == "regional_prompter":
-        # regional_prompterの処理
-        division, position, weight = div_regional_prompter(dropdown_row)
+    # ドロップダウンリストの中で0以外の値を抽出する
+    exist_col_num_list: List[str] = []
+    for col_num in col_num_list:
+        if col_num != "0":
+            exist_col_num_list.append(col_num)
+
+    if radio_sel == "Latent Couple":
+        # Latent Coupleの処理
+        division, position, weight = div_latent_couple(exist_col_num_list, div_ratio, back_ratio, chkbox_back)
+    elif radio_sel == "Regional Prompter":
+        # Regional Prompterの処理
+        division, position, weight = div_regional_prompter(exist_col_num_list)
     else:
         pass
 
@@ -96,29 +92,31 @@ def division_output(radio_sel: str, dd_row_1: str, dd_row_2: str, dd_row_3: str,
 
 def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
     with gr.Blocks(analytics_enabled=False) as ui_component:
-        gr.HTML(value='Latent Reagional Helper')
+        gr.HTML(value='Latent Regional Helper')
         with gr.Row():
             with gr.Column():  # Add a new column
                 # UI画面の作成
                 # 入力
                 # 拡張機能洗濯用のラジオボタン
                 radio_sel: gr.Radio = gr.Radio(
-                    ["latent_couple", "regional_prompter"],
-                    label="Select latent_couple or regional_prompter",
-                    value="latent_couple"  # デフォルト値を指定する
+                    ["Latent Couple", "Regional Prompter"],
+                    label="Select \"Latent Couple\" or \"Regional Prompter\"",
+                    value="Latent Couple"  # デフォルト値を指定する
                 )
-                print(radio_sel)
                 # テキストを表示
                 gr.HTML(value='Divisions Settings')
                 # Divisions Settingのドロップダウンリスト
-                dropdown_row: List[gr.Dropdown] = []
+                dropdown_col_num_list: List[gr.Dropdown] = []
                 for i in range(5):
-                    dropdown_row.append(gr.Dropdown(
+                    dropdown_col_num_list.append(gr.Dropdown(
                         ["0", "1", "2", "3", "4", "5"],
                         label=f"row{i+1} column num",
                         value="0"  # デフォルト値を指定する
                     ))
                 
+
+                # テキストを表示
+                gr.HTML(value='Ratio and Background Settings')
                 with gr.Row():
                     textbox_div_ratio: gr.Textbox = gr.Textbox(
                         label='Divisions Ratio (Latent Only)',
@@ -158,25 +156,25 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
             with gr.Column():  # Add a new column
                 pass
 
-            # btn_run 押したときの処理
+            # button_run 押したときの処理
             button_run.click(
-                # btn_run ボタンを押したときに実行される関数
+                # button_run ボタンを押したときに実行される関数
                 fn=division_output,
-                # add_str 関数の引数
-                # NOTE: dropdown_rowはリスト型で渡すことができない。
+                # division_output 関数の引数
+                # NOTE: column_num_row_listはリスト型で渡すことができない。
                 #       gradioブロック型のオブジェクトで渡す必要がある。
                 inputs=[
                     radio_sel,
-                    dropdown_row[0],
-                    dropdown_row[1],
-                    dropdown_row[2],
-                    dropdown_row[3],
-                    dropdown_row[4],
+                    dropdown_col_num_list[0],
+                    dropdown_col_num_list[1],
+                    dropdown_col_num_list[2],
+                    dropdown_col_num_list[3],
+                    dropdown_col_num_list[4],
                     textbox_div_ratio,
                     textbox_back_ratio,
                     chkbox_back
                 ],
-                # add_str 関数の戻り値
+                # division_output 関数の戻り値
                 outputs=[
                     textbox_division,
                     textbox_position,
