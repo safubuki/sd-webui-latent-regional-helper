@@ -1,8 +1,10 @@
-import gradio as gr
 from typing import List, Tuple
-# import modules.scripts as scripts
+
+import gradio as gr
 
 from modules import script_callbacks
+
+# import modules.scripts as scripts
 
 # ratioデフォルト値
 default_div_ratio: float = 0.8
