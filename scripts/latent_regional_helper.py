@@ -1,3 +1,4 @@
+"""Script that defines the UI and processing for Latent Regional Helper."""
 from typing import List, Tuple
 
 # NOTE: gradio is available in the StableDiffusion environment (no separate installation required)
