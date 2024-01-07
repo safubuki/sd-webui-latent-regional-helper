@@ -42,18 +42,18 @@
 1. 拡張機能のタブを開く
     - `LR Helper`タブを開く
 2. 出力フォーマットを選択  
-    - `Latent Couple` か `Regional Prompter` のどちらか一方を選択する
+    - `Latent Couple` か `Regional Prompter` のどちらか一方を選択する  
     ![select](./images/select.png)
 3. 領域分割を設定
     - `row1 column num`から`row5 column num`にそれぞれ列数を設定する  
-    ![division](./images/division.png)
+    ![division](./images/division.png)  
     - NOTE:
       - 列数が０の行は、スキップする
       - 列数が設定されている行の間に、列数が0の行がある場合、その行はスキップされて、行の間を詰める  
       - 最大で5(行)×5(列)の分割が可能
-    - もし、次のように設定したい場合
-    ![div_pic](./images/div_pic.png)
-    `Divisions Settings`は次のように設定する
+    - もし、次のように設定したい場合  
+    ![div_pic](./images/div_pic.png)  
+    `Divisions Settings`は次のように設定する  
       - `row1 column num` = 1
       - `row2 column num` = 5
       - `row3 column num` = 2
@@ -61,24 +61,24 @@
       - `row5 column num` = 0
 4. Weightと背景の設定
     - 手順2で`Latent Couple`を選択した場合、weightと背景の設定もできる  
-        ![weight_back](./images/weight_back.png)
+        ![weight_back](./images/weight_back.png)  
       - Divisions Weight  
         - `Divisions Weight`に分割領域のベースとなるweightを設定  
       - Background Weight and Enable setting
         - `Background Weight`に背景のweightを設定
         - Background Enableにチェックを入れる
       - 本設定は、`Latent Couple`の次の箇所に利用される  
-      ![weight_back_rel](./images/weight_back_rel.png)
+      ![weight_back_rel](./images/weight_back_rel.png)  
 5. 実行
     - 全てのInput設定が済んだら`execute`ボタンをクリック  
     - Outputのテキストボックスに結果が出力される  
 6. 出力結果の利用
     - Latent Coupleの場合
       - 手動で出力結果を`Latent Couple`にコピー＆ペースト  
-      ![latent_output](./images/latent_output.png)
+      ![latent_output](./images/latent_output.png)  
     - Regional Prompterの場合
       - 手動で出力結果を`Regional Prompter`にコピー＆ペースト  
-      ![regional_output](./images/regional_output.png)
+      ![regional_output](./images/regional_output.png)  
       - `Position`と`Weight`は使用しない
       - `Regional Prompter`の`Main Splitting`設定は`Columns`を選択
 7. 以降は、`Latent Couple`または`Regional Prompter`で作業を進める
