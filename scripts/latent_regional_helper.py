@@ -194,7 +194,7 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                 # Radio buttons for extension selection
                 radio_sel: gr.Radio = gr.Radio(
                     ['Latent Couple', 'Regional Prompter'],
-                    label='Select \'Latent Couple\' or \'Regional Prompter\'',
+                    label='Select output format \'Latent Couple\' or \'Regional Prompter\'',
                     value='Latent Couple'  # Specify default value
                 )
                 # Dropdown list for Divisions Setting
