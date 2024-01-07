@@ -113,10 +113,10 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
     # Combine dropdown list into a list
     col_num_list: List[str] = [col_num_1, col_num_2, col_num_3, col_num_4, col_num_5]
 
-    # Extract non-zero values from the dropdown list
+    # Extract non-zero and non-empty values from the dropdown list
     exist_col_num_list: List[str] = []
     for col_num in col_num_list:
-        if col_num != '0':
+        if isinstance(col_num, str) and col_num != '0' and col_num != '':
             exist_col_num_list.append(col_num)
 
     if len(exist_col_num_list) == 0:
