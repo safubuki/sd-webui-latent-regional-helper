@@ -17,7 +17,18 @@ ratio_threshold_max: float = 1.0
 
 def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_ratio: float,
                       chkbox_back: bool) -> Tuple[str, str, str]:
+    """
+    Create division parameters for Latent Couple.
 
+    Args:
+        exist_col_num_list (List[str]): List of column numbers for existing divisions.
+        div_ratio (float): Ratio for divided regions setting.
+        back_ratio (float): Ratio for the background setting.
+        chkbox_back (bool): Flag indicating whether the background setting is enabled.
+
+    Returns:
+        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+    """
     division: str = ''
     position: str = ''
     weight: str = ''
@@ -48,7 +59,15 @@ def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_rati
 
 
 def div_regional_prompter(exist_col_num_list: List[str]) -> Tuple[str, str, str]:
+    """
+    Create division parameters for Regional Prompter.
 
+    Args:
+        exist_col_num_list (List[str]): List of column numbers for existing divisions.
+
+    Returns:
+        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+    """
     division: str = ''
     if len(exist_col_num_list) == 1:
         # If only one value is input
@@ -73,6 +92,23 @@ def div_regional_prompter(exist_col_num_list: List[str]) -> Tuple[str, str, str]
 def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: str, col_num_4: str,
                     col_num_5: str, div_ratio: str, back_ratio: str,
                     chkbox_back: bool) -> Tuple[str, str, str]:
+    """
+    Create division parameters.
+
+    Args:
+        radio_sel (str): The selected radio button value.
+        col_num_1 (str): The column number for row 1.
+        col_num_2 (str): The column number for row 2.
+        col_num_3 (str): The column number for row 3.
+        col_num_4 (str): The column number for row 4.
+        col_num_5 (str): The column number for row 5.
+        div_ratio (str): The division ratio.
+        back_ratio (str): The background ratio.
+        chkbox_back (bool): Flag indicating whether the background setting is enabled.
+
+    Returns:
+        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+    """
     # Combine dropdown list into a list
     col_num_list: List[str] = [col_num_1, col_num_2, col_num_3, col_num_4, col_num_5]
 
@@ -108,6 +144,16 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
 
 
 def parse_float(value: str, default_value: float) -> float:
+    """
+    Parse a string value to float.
+
+    Args:
+        value (str): The value to be parsed.
+        default_value (float): The default value to be returned if parsing fails.
+
+    Returns:
+        float: The parsed float value or the default value.
+    """
     try:
         return float(value)
     except ValueError:
@@ -115,10 +161,27 @@ def parse_float(value: str, default_value: float) -> float:
 
 
 def clamp_value(value: float, min_value: float, max_value: float) -> float:
+    """
+    Clamp a value between a minimum and maximum value.
+
+    Args:
+        value (float): The value to be clamped.
+        min_value (float): The minimum value.
+        max_value (float): The maximum value.
+
+    Returns:
+        float: The clamped value.
+    """
     return max(min_value, min(max_value, float(value)))
 
 
 def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
+    """
+    Define the UI components and their behavior.
+
+    Returns:
+        List[Tuple[gr.Blocks, str, str]]: A list of tuples containing the UI components, tab name, and tab ID.
+    """
     # Create UI screen
     with gr.Blocks(analytics_enabled=False) as ui_component:
         gr.HTML(value='Latent Regional Helper')
