@@ -8,23 +8,23 @@ from modules import script_callbacks
 
 # import modules.scripts as scripts
 
-# Default values for ratio
-default_div_ratio: float = 0.8
-default_back_ratio: float = 0.2
-# Minimum/maximum values for ratio
-ratio_threshold_min: float = 0.0
-ratio_threshold_max: float = 1.0
+# Default values for weight
+default_div_weight: float = 0.8
+default_back_weight: float = 0.2
+# Minimum/maximum values for weight
+weight_threshold_min: float = 0.0
+weight_threshold_max: float = 1.0
 
 
-def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_ratio: float,
+def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_weight: float,
                       chkbox_back: bool) -> Tuple[str, str, str]:
     """
     Create division parameters for Latent Couple.
 
     Args:
         exist_col_num_list (List[str]): List of column numbers for existing divisions.
-        div_ratio (float): Ratio for divided regions setting.
-        back_ratio (float): Ratio for the background setting.
+        div_weight (float): weight for divided regions setting.
+        back_weight (float): weight for the background setting.
         chkbox_back (bool): Flag indicating whether the background setting is enabled.
 
     Returns:
@@ -37,7 +37,7 @@ def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_rati
     if chkbox_back is True:
         division += '1:1,'
         position += '0:0,'
-        weight += str(clamp_value(back_ratio, ratio_threshold_min, ratio_threshold_max)) + ','
+        weight += str(clamp_value(back_weight, weight_threshold_min, weight_threshold_max)) + ','
     else:
         pass
     # Setting for divided regions
@@ -47,7 +47,7 @@ def div_latent_couple(exist_col_num_list: List[str], div_ratio: float, back_rati
         for _ in range(int(col_num)):
             division += str(len(exist_col_num_list)) + ':' + str(col_num) + ','
             position += str(pos_row) + ':' + str(pos_col) + ','
-            weight += str(clamp_value(div_ratio, ratio_threshold_min, ratio_threshold_max)) + ','
+            weight += str(clamp_value(div_weight, weight_threshold_min, weight_threshold_max)) + ','
             pos_col += 1
         pos_col = 0
         pos_row += 1
@@ -91,7 +91,7 @@ def div_regional_prompter(exist_col_num_list: List[str]) -> Tuple[str, str, str]
 
 
 def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: str, col_num_4: str,
-                    col_num_5: str, div_ratio: str, back_ratio: str,
+                    col_num_5: str, div_weight: str, back_weight: str,
                     chkbox_back: bool) -> Tuple[str, str, str]:
     """
     Create division parameters.
@@ -103,8 +103,8 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
         col_num_3 (str): The column number for row 3.
         col_num_4 (str): The column number for row 4.
         col_num_5 (str): The column number for row 5.
-        div_ratio (str): The division ratio.
-        back_ratio (str): The background ratio.
+        div_weight (str): The division weight.
+        back_weight (str): The background weight.
         chkbox_back (bool): Flag indicating whether the background setting is enabled.
 
     Returns:
@@ -126,12 +126,12 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
         weight = '(No divisions settings)'
     else:
         if radio_sel == 'Latent Couple':
-            # Parse ratio values
-            div_ratio_f = parse_float(div_ratio, default_div_ratio)
-            back_ratio_f = parse_float(back_ratio, default_back_ratio)
+            # Parse weight values
+            div_weight_f = parse_float(div_weight, default_div_weight)
+            back_weight_f = parse_float(back_weight, default_back_weight)
             # Process for Latent Couple
-            division, position, weight = div_latent_couple(exist_col_num_list, div_ratio_f,
-                                                           back_ratio_f, chkbox_back)
+            division, position, weight = div_latent_couple(exist_col_num_list, div_weight_f,
+                                                           back_weight_f, chkbox_back)
         elif radio_sel == 'Regional Prompter':
             # Process for Regional Prompter
             division, position, weight = div_regional_prompter(exist_col_num_list)
@@ -208,18 +208,18 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                             value='0'  # Specify default value
                         ))
 
-                # Ratio and Background Settings
-                gr.HTML(value='Ratio and Background Settings')
+                # weight and Background Settings
+                gr.HTML(value='Weight and Background Settings')
                 with gr.Row():
-                    textbox_div_ratio: gr.Textbox = gr.Textbox(
-                        label='Divisions Ratio (Latent Only)',
+                    textbox_div_weight: gr.Textbox = gr.Textbox(
+                        label='Divisions Weight (Latent Only)',
                         interactive=True,
-                        value=str(default_div_ratio))
+                        value=str(default_div_weight))
 
-                    textbox_back_ratio: gr.Textbox = gr.Textbox(
-                        label='Background Ratio (Latent Only)',
+                    textbox_back_weight: gr.Textbox = gr.Textbox(
+                        label='Background Weight (Latent Only)',
                         interactive=True,
-                        value=str(default_back_ratio))
+                        value=str(default_back_weight))
 
                     chkbox_back: gr.Checkbox = gr.Checkbox(label='Background Enable (Latent Only)',
                                                            value=False)
@@ -249,7 +249,7 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                 inputs=[
                     radio_sel, dropdown_col_num_list[0], dropdown_col_num_list[1],
                     dropdown_col_num_list[2], dropdown_col_num_list[3], dropdown_col_num_list[4],
-                    textbox_div_ratio, textbox_back_ratio, chkbox_back
+                    textbox_div_weight, textbox_back_weight, chkbox_back
                 ],
                 # Return values of the division_output function
                 outputs=[textbox_division, textbox_position, textbox_weight])
