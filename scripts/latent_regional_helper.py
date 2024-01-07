@@ -232,10 +232,10 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                 # Textbox for output
                 textbox_division: gr.Textbox = gr.Textbox(label='Divisions Ratio', interactive=True)
                 with gr.Row():
-                    textbox_position: gr.Textbox = gr.Textbox(label='Position (Latent Only)',
-                                                              interactive=True)
                     textbox_weight: gr.Textbox = gr.Textbox(label='Weight (Latent Only)',
                                                             interactive=True)
+                    textbox_position: gr.Textbox = gr.Textbox(label='Position (Latent Only)',
+                                                              interactive=True)
             with gr.Column():  # Add a new column
                 pass
 
