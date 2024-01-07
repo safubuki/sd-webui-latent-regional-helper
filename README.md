@@ -40,7 +40,7 @@
 1. 拡張機能のタブを開く
     - `LR Helper`タブを開く
 2. 出力フォーマットを選択  
-    - `Latent Couple` か `Regional Prompter` のどちらか一方を選択する。
+    - `Latent Couple` か `Regional Prompter` のどちらか一方を選択する
     ![select](./images/select.png)
 3. 領域分割を設定
     - `row1 column num`から`row5 column num`にそれぞれ列数を設定する  
@@ -51,14 +51,14 @@
       - 最大で5(行)×5(列)の分割が可能
     - もし、次のように設定したい場合
     ![div_pic](./images/div_pic.png)
-    `Divisions Settings`は次のように設定する。
+    `Divisions Settings`は次のように設定する
       - `row1 column num` = 1
       - `row2 column num` = 5
       - `row3 column num` = 2
       - `row4 column num` = 0
       - `row5 column num` = 0
 4. Weightと背景の設定
-    - 手順2で`Latent Couple`を選択した場合、weightと背景の設定もできる。  
+    - 手順2で`Latent Couple`を選択した場合、weightと背景の設定もできる  
         ![weight_back](./images/weight_back.png)
       - Divisions Weight  
         - `Divisions Weight`に分割領域のベースとなるweightを設定  
@@ -78,12 +78,8 @@
       - 手動で出力結果を`Regional Prompter`にコピー＆ペースト  
       ![regional_output](./images/regional_output.png)
       - `Position`と`Weight`は使用しない
-      - `Regional Prompter`の`Main Splitting`は`Columns`に設定
-7. 以降は、それぞれの拡張機能で作業を進める
-
-- こんなメッセージが出たときは？
-  - (No divisions settings)  
-    - divisions settingsの値がすべて0の場合、このメッセージが出力されます。
+      - `Regional Prompter`の`Main Splitting`設定は`Columns`を選択
+7. 以降は、`Latent Couple`または`Regional Prompter`で作業を進める
 
 ## リンク
 
@@ -102,4 +98,3 @@
 ## 最後に
 
 もし問題、要望などありましたら、issueでご連絡ください。
-
