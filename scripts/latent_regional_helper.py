@@ -121,9 +121,9 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
 
     if len(exist_col_num_list) == 0:
         # If there is no input
-        division = '(No division settings)'
-        position = '(No division settings)'
-        weight = '(No division settings)'
+        division = '(No divisions settings)'
+        position = '(No divisions settings)'
+        weight = '(No divisions settings)'
     else:
         if radio_sel == 'Latent Couple':
             # Parse ratio values
@@ -181,11 +181,13 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
     Define the UI components and their behavior.
 
     Returns:
-        List[Tuple[gr.Blocks, str, str]]: A list of tuples containing the UI components, tab name, and tab ID.
+        List[Tuple[gr.Blocks, str, str]]: A list of tuples containing the UI components,
+                                          tab name, and tab ID.
     """
     # Create UI screen
     with gr.Blocks(analytics_enabled=False) as ui_component:
         gr.HTML(value='Latent Regional Helper')
+        gr.HTML(value='Input')
         with gr.Row():
             with gr.Column():  # Add a new column
                 # Input
@@ -223,9 +225,10 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                                                            value=False)
 
                 # Run button
-                button_run: gr.Button = gr.Button(value='run', variant='primary')
+                button_execute: gr.Button = gr.Button(value='execute', variant='primary')
 
                 # Output
+                gr.HTML(value='Output')
                 # Textbox for output
                 textbox_division: gr.Textbox = gr.Textbox(label='Divisions Ratio', interactive=True)
                 with gr.Row():
@@ -236,9 +239,9 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
             with gr.Column():  # Add a new column
                 pass
 
-            # Processing when button_run is clicked
-            button_run.click(
-                # Function to be executed when button_run is clicked
+            # Processing when button_execute is clicked
+            button_execute.click(
+                # Function to be executed when button_execute is clicked
                 fn=division_output,
                 # Arguments for the division_output function
                 # NOTE: column_num_row_list cannot be passed as a list.
