@@ -29,7 +29,7 @@ def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_wei
         chkbox_back (bool): Flag indicating whether the background setting is enabled.
 
     Returns:
-        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+        Tuple[str, str, str, str]: A tuple containing the division, position, weight, and prompt.
     """
     division: str = ''
     position: str = ''
