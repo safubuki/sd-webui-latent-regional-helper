@@ -240,16 +240,14 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                     gr.HTML(value='Latent Couple Settings')
                     gr.HTML(value='Weight and Background')
                     with gr.Row():
-                        textbox_div_weight: gr.Textbox = gr.Textbox(
-                            label='Divisions Weight (Latent Only)',
-                            interactive=True,
-                            value=str(default_div_weight))
-                        textbox_back_weight: gr.Textbox = gr.Textbox(
-                            label='Background Weight (Latent Only)',
-                            interactive=True,
-                            value=str(default_back_weight))
-                        chkbox_back: gr.Checkbox = gr.Checkbox(
-                            label='Background Enable (Latent Only)', value=False)
+                        textbox_div_weight: gr.Textbox = gr.Textbox(label='Divisions Weight',
+                                                                    interactive=True,
+                                                                    value=str(default_div_weight))
+                        textbox_back_weight: gr.Textbox = gr.Textbox(label='Background Weight',
+                                                                     interactive=True,
+                                                                     value=str(default_back_weight))
+                        chkbox_back: gr.Checkbox = gr.Checkbox(label='Enable Background',
+                                                               value=False)
                 with gr.Column(variant='panel'):  # Add a new column
                     gr.HTML(value='Regional Prompter Settings')
                     gr.HTML(value='Base and Common Prompt Settings')
