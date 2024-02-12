@@ -18,7 +18,7 @@ weight_threshold_max: float = 1.0
 
 
 def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_weight: float,
-                      chkbox_back: bool) -> Tuple[str, str, str]:
+                      chkbox_back: bool) -> Tuple[str, str, str, str]:
     """
     Create division parameters for Latent Couple.
 
@@ -34,11 +34,13 @@ def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_wei
     division: str = ''
     position: str = ''
     weight: str = ''
+    prompt: str = ''
     # If background setting is enabled
     if chkbox_back is True:
         division += '1:1,'
         position += '0:0,'
         weight += str(clamp_value(back_weight, weight_threshold_min, weight_threshold_max)) + ','
+        prompt += '\nAND '
     else:
         pass
     # Setting for divided regions
@@ -46,18 +48,23 @@ def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_wei
     pos_col: int = 0
     for col_num in exist_col_num_list:
         for _ in range(int(col_num)):
+            # Add division, position, and weight
             division += str(len(exist_col_num_list)) + ':' + str(col_num) + ','
             position += str(pos_row) + ':' + str(pos_col) + ','
             weight += str(clamp_value(div_weight, weight_threshold_min, weight_threshold_max)) + ','
             pos_col += 1
+        # Add prompt
+        prompt += '\nAND ' * (int(col_num) - 1)  # Add AND for each column
+        prompt += '\nAND '  # Add AND for each row
         pos_col = 0
         pos_row += 1
-    # Remove trailing commas
+    # remove trailing commas and AND
     division = division.rstrip(',')
     position = position.rstrip(',')
     weight = weight.rstrip(',')
+    prompt = prompt[:prompt.rfind('\nAND ')]  # Remove last occurrence of '\nAND '
 
-    return division, position, weight
+    return division, position, weight, prompt
 
 
 def div_regional_prompter(exist_col_num_list: List[str], chkbox_base_prompt: bool,
@@ -68,7 +75,8 @@ def div_regional_prompter(exist_col_num_list: List[str], chkbox_base_prompt: boo
     Args:
         exist_col_num_list (List[str]): A list of column numbers.
         chkbox_base_prompt (bool): A boolean indicating whether the base prompt checkbox is checked.
-        chkbox_common_prompt (bool): A boolean indicating whether the common prompt checkbox is checked.
+        chkbox_common_prompt (bool):
+            A boolean indicating whether the common prompt checkbox is checked.
 
     Returns:
         Tuple[str, str, str, str]: A tuple containing the division, position, weight, and prompt.
@@ -77,27 +85,25 @@ def div_regional_prompter(exist_col_num_list: List[str], chkbox_base_prompt: boo
     division: str = ''
     prompt: str = ''
 
-    if chkbox_common_prompt is True:
-        prompt += 'ADDCOMM\n'
-    if chkbox_base_prompt is True:
-        prompt += 'ADDBASE\n'
+    # Add base and common prompt settings
+    if chkbox_common_prompt:
+        prompt += ' ADDCOMM\n'
+    if chkbox_base_prompt:
+        prompt += ' ADDBASE\n'
 
-    if len(exist_col_num_list) == 1:
-        # If only one value is input
-        division = '1,' * int(exist_col_num_list[0])
-        division = division.rstrip(',')  # Remove trailing commas
-        prompt = 'ADDCOL\n' * (int(exist_col_num_list[0]) - 1)
-    elif len(exist_col_num_list) >= 2:
-        # If two or more values are input
+    # Add division settings
+    if len(exist_col_num_list) >= 1:
         for col_num in exist_col_num_list:
-            col_num_str = '1' + (',1' * int(col_num))
-            division += col_num_str + ';'
-            prompt_col_str = 'ADDCOL\n' * (int(col_num) - 1)
-            prompt += prompt_col_str + 'ADDROW\n'
+            # Add division settings
+            division += '1' + (',1' * int(col_num))
+            division += ';'
+            # Add prompt settings
+            prompt += ' ADDCOL\n' * (int(col_num) - 1)
+            prompt += ' ADDROW\n'
+        # Remove trailing semicolons and ADDROW
         division = division.rstrip(';')  # Remove trailing semicolons
-        prompt = prompt.rstrip('ADDROW\n')  # Remove trailing ADDROW
+        prompt = prompt[:prompt.rfind(' ADDROW\n')]  # Remove last occurrence of ' ADDROW\n'
     else:
-        # If there is no input (However, it has been checked in the calling function)
         division = '(Not used)'
         prompt = '(Not used)'
 
@@ -149,8 +155,8 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
             div_weight_f = parse_float(div_weight, default_div_weight)
             back_weight_f = parse_float(back_weight, default_back_weight)
             # Process for Latent Couple
-            division, position, weight = div_latent_couple(exist_col_num_list, div_weight_f,
-                                                           back_weight_f, chkbox_back)
+            division, position, weight, prompt = div_latent_couple(exist_col_num_list, div_weight_f,
+                                                                   back_weight_f, chkbox_back)
         elif radio_sel == 'Regional Prompter':
             # Process for Regional Prompter
             division, position, weight, prompt = div_regional_prompter(
