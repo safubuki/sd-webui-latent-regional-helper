@@ -6,12 +6,24 @@
 
 - [sd-webui-latent-regional-helper](#sd-webui-latent-regional-helper)
   - [目次](#目次)
+  - [リリースノート](#リリースノート)
   - [概要](#概要)
   - [インストール方法](#インストール方法)
   - [使い方](#使い方)
+    - [共通設定](#共通設定)
+    - [個別設定と出力結果利用](#個別設定と出力結果利用)
+      - [Latent Coupleの場合](#latent-coupleの場合)
+      - [Regional Prompterの場合](#regional-prompterの場合)
   - [リンク](#リンク)
   - [ライセンス](#ライセンス)
   - [最後に](#最後に)
+
+## リリースノート
+
+- 2024/02/13
+  - デザインの変更
+  - プロンプトのテンプレートを出力する機能を追加
+  - プロンプトのテンプレートをtxt2img、またはimg2imgに送信する機能を追加
 
 ## 概要
 
@@ -21,7 +33,8 @@
 
 `Latent Regional Helper`は、とても小さいプログラムですが、あなたの領域分割の助けとなり、悩みから解放するでしょう。
 
-![lr_helper](./images/lr_helper.png)
+![lr_helper1](./images/lr_helper1.png)
+![lr_helper2](./images/lr_helper2.png)
 
 ## インストール方法
 
@@ -38,6 +51,8 @@
 ## 使い方
 
 以下に`Latent Regional Helper`の使い方を示す。
+
+### 共通設定
 
 1. 拡張機能のタブを開く
     - `LR Helper`タブを開く
@@ -59,29 +74,54 @@
       - `row3 column num` = 2
       - `row4 column num` = 0
       - `row5 column num` = 0
-4. Weightと背景の設定
-    - 手順2で`Latent Couple`を選択した場合、weightと背景の設定もできる  
-        ![weight_back](./images/weight_back.png)  
+
+### 個別設定と出力結果利用
+
+#### Latent Coupleの場合
+
+1. Weightと背景の設定
+   - 共通設定で`Latent Couple`を選択した場合、次の設定ができる
+   ![lat_settings](./images/lat_settings.png)
       - Divisions Weight  
         - `Divisions Weight`に分割領域のベースとなるweightを設定  
       - Background Weight and Enable setting
         - `Background Weight`に背景のweightを設定
         - Background Enableにチェックを入れる
-      - 本設定は、`Latent Couple`の次の箇所に利用される  
+      - 設定は、`Latent Couple`の次の箇所に利用される  
       ![weight_back_rel](./images/weight_back_rel.png)  
-5. 実行
+      Enable Backgroundは、後述のPrompt Templeteにも利用する
+
+2. 実行
+   - 全てのInput設定が済んだら`execute`ボタンをクリック  
+   - Outputのテキストボックスに結果が出力される  
+
+3. 出力結果の利用
+   - 分割設定の出力結果は、手動で`Latent Couple`にコピー＆ペースト  
+   ![latent_output](./images/latent_output.png)  
+   - Prompt Templateは、`Send to txt2img`または`Send to img2img`ボタンをクリックすると、`txt2img` `img2img`のプロンプトエリアにコピーできる
+   ![lat_temp](./images/lat_temp.png)
+
+#### Regional Prompterの場合
+
+1. Base and Common プロンプト設定
+   - 共通設定で`Regional Prompter`を選択した場合、次の設定ができる
+   ![reg_settings](./images/reg_settings.png)
+      - Base and Common Prompt Settings
+        - それぞれ、チェックを入れるとOutputの`Prompt Template`に`ADDBASE` `ADDCOMM`が出力される  
+        なお、このチェックは分割設定の出力には影響を与えない
+
+2. 実行
     - 全てのInput設定が済んだら`execute`ボタンをクリック  
     - Outputのテキストボックスに結果が出力される  
-6. 出力結果の利用
-    - Latent Coupleの場合
-      - 手動で出力結果を`Latent Couple`にコピー＆ペースト  
-      ![latent_output](./images/latent_output.png)  
-    - Regional Prompterの場合
-      - 手動で出力結果を`Regional Prompter`にコピー＆ペースト  
-      ![regional_output](./images/regional_output.png)  
+
+3. 出力結果の利用
+   - 分割設定の出力結果は、手動で`Regional Prompter`にコピー＆ペースト  
+   ![regional_output](./images/regional_output.png)  
       - `Position`と`Weight`は使用しない
-      - `Regional Prompter`の`Main Splitting`設定は`Columns`を選択
-7. 以降は、`Latent Couple`または`Regional Prompter`で作業を進める
+      - `Regional Prompter`の`Main Splitting`設定は`Columns`を選択すること
+   - Prompt Templateは、`Send to txt2img`または`Send to img2img`ボタンをクリックすると、`txt2img` `img2img`のプロンプトエリアにコピーできる
+   ![reg_temp](./images/reg_temp.png)
+4. 以降は、`Latent Couple`または`Regional Prompter`で作業を進める
 
 ## リンク
 

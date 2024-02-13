@@ -4,6 +4,7 @@ from typing import List, Tuple
 # NOTE: gradio is available in the StableDiffusion environment (no separate installation required)
 import gradio as gr
 
+from modules import generation_parameters_copypaste as params_copypaste
 from modules import script_callbacks
 
 # import modules.scripts as scripts
@@ -17,7 +18,7 @@ weight_threshold_max: float = 1.0
 
 
 def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_weight: float,
-                      chkbox_back: bool) -> Tuple[str, str, str]:
+                      chkbox_back: bool) -> Tuple[str, str, str, str]:
     """
     Create division parameters for Latent Couple.
 
@@ -28,16 +29,18 @@ def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_wei
         chkbox_back (bool): Flag indicating whether the background setting is enabled.
 
     Returns:
-        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+        Tuple[str, str, str, str]: A tuple containing the division, position, weight, and prompt.
     """
     division: str = ''
     position: str = ''
     weight: str = ''
+    prompt: str = ''
     # If background setting is enabled
     if chkbox_back is True:
         division += '1:1,'
         position += '0:0,'
         weight += str(clamp_value(back_weight, weight_threshold_min, weight_threshold_max)) + ','
+        prompt += '\nAND '
     else:
         pass
     # Setting for divided regions
@@ -45,54 +48,75 @@ def div_latent_couple(exist_col_num_list: List[str], div_weight: float, back_wei
     pos_col: int = 0
     for col_num in exist_col_num_list:
         for _ in range(int(col_num)):
+            # Add division, position, and weight
             division += str(len(exist_col_num_list)) + ':' + str(col_num) + ','
             position += str(pos_row) + ':' + str(pos_col) + ','
             weight += str(clamp_value(div_weight, weight_threshold_min, weight_threshold_max)) + ','
             pos_col += 1
+        # Add prompt
+        prompt += '\nAND ' * (int(col_num) - 1)  # Add AND for each column
+        prompt += '\nAND '  # Add AND for each row
         pos_col = 0
         pos_row += 1
-    # Remove trailing commas
+    # remove trailing commas and AND
     division = division.rstrip(',')
     position = position.rstrip(',')
     weight = weight.rstrip(',')
+    prompt = prompt[:prompt.rfind('\nAND ')]  # Remove last occurrence of '\nAND '
 
-    return division, position, weight
+    return division, position, weight, prompt
 
 
-def div_regional_prompter(exist_col_num_list: List[str]) -> Tuple[str, str, str]:
+def div_regional_prompter(exist_col_num_list: List[str], chkbox_base_prompt: bool,
+                          chkbox_common_prompt: bool) -> Tuple[str, str, str, str]:
     """
-    Create division parameters for Regional Prompter.
+    Generate division, position, weight, and prompt based on the given parameters.
 
     Args:
-        exist_col_num_list (List[str]): List of column numbers for existing divisions.
+        exist_col_num_list (List[str]): A list of column numbers.
+        chkbox_base_prompt (bool): A boolean indicating whether the base prompt checkbox is checked.
+        chkbox_common_prompt (bool):
+            A boolean indicating whether the common prompt checkbox is checked.
 
     Returns:
-        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+        Tuple[str, str, str, str]: A tuple containing the division, position, weight, and prompt.
+
     """
     division: str = ''
-    if len(exist_col_num_list) == 1:
-        # If only one value is input
-        division = '1,' * int(exist_col_num_list[0])
-        division = division.rstrip(',')  # Remove trailing commas
-    elif len(exist_col_num_list) >= 2:
-        # If two or more values are input
+    prompt: str = ''
+
+    # Add base and common prompt settings
+    if chkbox_common_prompt:
+        prompt += ' ADDCOMM\n'
+    if chkbox_base_prompt:
+        prompt += ' ADDBASE\n'
+
+    # Add division settings
+    if len(exist_col_num_list) >= 1:
         for col_num in exist_col_num_list:
-            col_num_str = '1' + (',1' * int(col_num))
-            division += col_num_str + ';'
+            # Add division settings
+            division += '1' + (',1' * int(col_num))
+            division += ';'
+            # Add prompt settings
+            prompt += ' ADDCOL\n' * (int(col_num) - 1)
+            prompt += ' ADDROW\n'
+        # Remove trailing semicolons and ADDROW
         division = division.rstrip(';')  # Remove trailing semicolons
+        prompt = prompt[:prompt.rfind(' ADDROW\n')]  # Remove last occurrence of ' ADDROW\n'
     else:
-        # If there is no input (However, it has been checked in the calling function)
         division = '(Not used)'
+        prompt = '(Not used)'
 
     position: str = '(Not used)'
     weight: str = '(Not used)'
 
-    return division, position, weight
+    return division, position, weight, prompt
 
 
 def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: str, col_num_4: str,
-                    col_num_5: str, div_weight: str, back_weight: str,
-                    chkbox_back: bool) -> Tuple[str, str, str]:
+                    col_num_5: str, div_weight: str, back_weight: str, chkbox_back: bool,
+                    chkbox_base_prompt: bool,
+                    chkbox_common_prompt: bool) -> Tuple[str, str, str, str]:
     """
     Create division parameters.
 
@@ -108,7 +132,7 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
         chkbox_back (bool): Flag indicating whether the background setting is enabled.
 
     Returns:
-        Tuple[str, str, str]: A tuple containing the division, position, and weight.
+        Tuple[str, str, str]: A tuple containing the division, position, weight and prompt.
     """
     # Combine dropdown list into a list
     col_num_list: List[str] = [col_num_1, col_num_2, col_num_3, col_num_4, col_num_5]
@@ -124,24 +148,27 @@ def division_output(radio_sel: str, col_num_1: str, col_num_2: str, col_num_3: s
         division = '(No divisions settings)'
         position = '(No divisions settings)'
         weight = '(No divisions settings)'
+        prompt = '(No divisions settings)'
     else:
         if radio_sel == 'Latent Couple':
             # Parse weight values
             div_weight_f = parse_float(div_weight, default_div_weight)
             back_weight_f = parse_float(back_weight, default_back_weight)
             # Process for Latent Couple
-            division, position, weight = div_latent_couple(exist_col_num_list, div_weight_f,
-                                                           back_weight_f, chkbox_back)
+            division, position, weight, prompt = div_latent_couple(exist_col_num_list, div_weight_f,
+                                                                   back_weight_f, chkbox_back)
         elif radio_sel == 'Regional Prompter':
             # Process for Regional Prompter
-            division, position, weight = div_regional_prompter(exist_col_num_list)
+            division, position, weight, prompt = div_regional_prompter(
+                exist_col_num_list, chkbox_base_prompt, chkbox_common_prompt)
         else:
             # Error handling: If an invalid selection is made
             division = '(Latent selection error)'
             position = '(Latent selection error)'
             weight = '(Latent selection error)'
+            prompt = '(Latent selection error)'
 
-    return division, position, weight
+    return division, position, weight, prompt
 
 
 def parse_float(value: str, default_value: float) -> float:
@@ -188,56 +215,69 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
     with gr.Blocks(analytics_enabled=False) as ui_component:
         gr.HTML(value='Latent Regional Helper')
         gr.HTML(value='Input')
-        with gr.Row():
-            with gr.Column():  # Add a new column
-                # Input
-                # Radio buttons for extension selection
-                radio_sel: gr.Radio = gr.Radio(
-                    ['Latent Couple', 'Regional Prompter'],
-                    label='Select output format \'Latent Couple\' or \'Regional Prompter\'',
-                    value='Latent Couple'  # Specify default value
-                )
-                # Dropdown list for Divisions Setting
-                gr.HTML(value='Divisions Settings')
-                dropdown_col_num_list: List[gr.Dropdown] = []
-                for i in range(5):
-                    dropdown_col_num_list.append(
-                        gr.Dropdown(
-                            ['0', '1', '2', '3', '4', '5'],
-                            label=f'row{i+1} column num',
-                            value='0'  # Specify default value
-                        ))
+        with gr.Column():
+            # Input
+            gr.HTML(value='Common Settings')
+            # Radio buttons for extension selection
+            radio_sel: gr.Radio = gr.Radio(
+                ['Latent Couple', 'Regional Prompter'],
+                label='Select output format \'Latent Couple\' or \'Regional Prompter\'',
+                value='Latent Couple'  # Specify default value
+            )
+            # Dropdown list for Divisions Setting
+            gr.HTML(value='Divisions')
+            dropdown_col_num_list: List[gr.Dropdown] = []
+            for i in range(5):
+                dropdown_col_num_list.append(
+                    gr.Dropdown(
+                        ['0', '1', '2', '3', '4', '5'],
+                        label=f'row{i+1} column num',
+                        value='0'  # Specify default value
+                    ))
+            gr.HTML(value='Individual Settings')
+            with gr.Row():
+                with gr.Column(variant='panel'):  # Add a new column
+                    gr.HTML(value='Latent Couple Settings')
+                    gr.HTML(value='Weight and Background')
+                    with gr.Row():
+                        textbox_div_weight: gr.Textbox = gr.Textbox(label='Divisions Weight',
+                                                                    interactive=True,
+                                                                    value=str(default_div_weight))
+                        textbox_back_weight: gr.Textbox = gr.Textbox(label='Background Weight',
+                                                                     interactive=True,
+                                                                     value=str(default_back_weight))
+                        chkbox_back: gr.Checkbox = gr.Checkbox(label='Enable Background',
+                                                               value=False)
+                with gr.Column(variant='panel'):  # Add a new column
+                    gr.HTML(value='Regional Prompter Settings')
+                    gr.HTML(value='Base and Common Prompt Settings')
+                    with gr.Row():
+                        # Checkbox for Use base prompt
+                        chkbox_base_prompt: gr.Checkbox = gr.Checkbox(label='Use base prompt',
+                                                                      value=False)
 
-                # weight and Background Settings
-                gr.HTML(value='Weight and Background Settings')
-                with gr.Row():
-                    textbox_div_weight: gr.Textbox = gr.Textbox(
-                        label='Divisions Weight (Latent Only)',
-                        interactive=True,
-                        value=str(default_div_weight))
-
-                    textbox_back_weight: gr.Textbox = gr.Textbox(
-                        label='Background Weight (Latent Only)',
-                        interactive=True,
-                        value=str(default_back_weight))
-
-                    chkbox_back: gr.Checkbox = gr.Checkbox(label='Background Enable (Latent Only)',
-                                                           value=False)
-
-                # Run button
-                button_execute: gr.Button = gr.Button(value='execute', variant='primary')
-
-                # Output
-                gr.HTML(value='Output')
-                # Textbox for output
-                textbox_division: gr.Textbox = gr.Textbox(label='Divisions Ratio', interactive=True)
-                with gr.Row():
-                    textbox_weight: gr.Textbox = gr.Textbox(label='Weight (Latent Only)',
-                                                            interactive=True)
-                    textbox_position: gr.Textbox = gr.Textbox(label='Position (Latent Only)',
-                                                              interactive=True)
-            with gr.Column():  # Add a new column
-                pass
+                        # Checkbox for Use common prompt
+                        chkbox_common_prompt: gr.Checkbox = gr.Checkbox(label='Use common prompt',
+                                                                        value=False)
+            # Run button
+            button_execute: gr.Button = gr.Button(value='execute', variant='primary')
+            # Output
+            gr.HTML(value='Output')
+            # Textbox for output
+            textbox_division: gr.Textbox = gr.Textbox(label='Divisions Ratio', interactive=True)
+            with gr.Row():
+                textbox_weight: gr.Textbox = gr.Textbox(label='Weight (Latent Only)',
+                                                        interactive=True)
+                textbox_position: gr.Textbox = gr.Textbox(label='Position (Latent Only)',
+                                                          interactive=True)
+            # Textbox for prompt template output
+            textbox_prompt_output: gr.Textbox = gr.Textbox(label='Prompt Template',
+                                                           interactive=True)
+            # Button to copy the contents of prompt_output to txt2img and img2img
+            gr.HTML(value='Send to Prompt Template to txt2img or img2img')
+            with gr.Row():
+                buttons = params_copypaste.create_buttons(['txt2img', 'img2img'])
+            params_copypaste.bind_buttons(buttons, None, textbox_prompt_output)
 
             # Processing when button_execute is clicked
             button_execute.click(
@@ -249,10 +289,11 @@ def on_ui_tabs() -> List[Tuple[gr.Blocks, str, str]]:
                 inputs=[
                     radio_sel, dropdown_col_num_list[0], dropdown_col_num_list[1],
                     dropdown_col_num_list[2], dropdown_col_num_list[3], dropdown_col_num_list[4],
-                    textbox_div_weight, textbox_back_weight, chkbox_back
+                    textbox_div_weight, textbox_back_weight, chkbox_back, chkbox_base_prompt,
+                    chkbox_common_prompt
                 ],
                 # Return values of the division_output function
-                outputs=[textbox_division, textbox_position, textbox_weight])
+                outputs=[textbox_division, textbox_position, textbox_weight, textbox_prompt_output])
 
         return [(ui_component, 'LR Helper', 'lr_helper_tab')]
 
